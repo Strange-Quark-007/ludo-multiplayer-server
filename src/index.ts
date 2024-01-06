@@ -2,6 +2,7 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import { handleConnect, handleDisconnect } from './functions/connectionLogic';
+import { handleJoinRoom } from './functions/roomLogic';
 import { GlobalState, ConnectedUsers } from './types/types';
 
 const app = express();
@@ -29,6 +30,16 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
 
   handleConnect(io, socket, connectedUsers);
+
+
+  socket.on('joinRoom', (room: string) =>
+    handleJoinRoom(io, socket, room, globalState, connectedUsers));
+
+
+
+  // * Leaving room is same as disconnect and might not need to repeat same logic. socket.on('disconnect') handles it all.
+  // socket.on('leaveRoom', (room: string) =>
+  //   handleLeaveRoom(io, socket, room, globalState, connectedUsers));
 
   socket.on('disconnect', () =>
     handleDisconnect(io, socket, globalState, connectedUsers));
