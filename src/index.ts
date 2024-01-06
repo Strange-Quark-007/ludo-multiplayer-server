@@ -3,6 +3,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import { handleConnect, handleDisconnect } from './functions/connectionLogic';
 import { handleJoinRoom } from './functions/roomLogic';
+import { handleNameChange } from './functions/nameChange';
 import { GlobalState, ConnectedUsers } from './types/types';
 
 const app = express();
@@ -30,6 +31,9 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
 
   handleConnect(io, socket, connectedUsers);
+
+  socket.on('nameChange', (name: string) =>
+    handleNameChange(io, socket, globalState, connectedUsers, name));
 
 
   socket.on('joinRoom', (room: string) =>
