@@ -1,8 +1,10 @@
+export interface User {
+  name: string;
+  room: string;
+};
+
 export interface ConnectedUsers {
-  [socketId: string]: {
-    name: string;
-    room: string;
-  };
+  [socketId: string]: User;
 }
 
 export interface Room {
