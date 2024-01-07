@@ -2,22 +2,21 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import { handleConnect, handleDisconnect } from './functions/connectionLogic';
-import { handleJoinRoom } from './functions/roomLogic';
 import { handleNameChange } from './functions/nameChange';
+import { handleJoinRoom } from './functions/roomLogic';
 import { GlobalState, ConnectedUsers } from './types/types';
+import { gameLogic } from './functions/gameLogic';
 
 const app = express();
 const httpServer = http.createServer(app);
-
 const io = new Server(httpServer, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: '*',
     methods: ['GET', 'POST'],
     credentials: true,
   },
   transports: ['websocket'],
 });
-
 
 
 let connectedUsers: ConnectedUsers = {};
@@ -27,6 +26,25 @@ app.get('/', (req, res) => {
   res.send('Hello LUDO!');
 });
 
+// * For testing 
+
+app.get('/all', (req, res) => {
+  res.send(JSON.stringify([{ ...globalState }, { ...connectedUsers }]));
+});
+
+app.get('/state', (req, res) => {
+  res.send(JSON.stringify(globalState));
+});
+
+app.get('/users', (req, res) => {
+  res.send(JSON.stringify(connectedUsers));
+});
+
+app.get('/rooms', (req, res) => {
+  res.send(JSON.stringify(globalState.rooms));
+});
+
+
 
 io.on('connection', (socket) => {
 
@@ -35,10 +53,11 @@ io.on('connection', (socket) => {
   socket.on('nameChange', (name: string) =>
     handleNameChange(io, socket, globalState, connectedUsers, name));
 
-
   socket.on('joinRoom', (room: string) =>
     handleJoinRoom(io, socket, room, globalState, connectedUsers));
 
+
+  gameLogic(io, socket, globalState, connectedUsers);
 
 
   // * Leaving room is same as disconnect and might not need to repeat same logic. socket.on('disconnect') handles it all.
