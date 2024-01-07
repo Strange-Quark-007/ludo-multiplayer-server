@@ -1,5 +1,6 @@
 import { Server, Socket } from 'socket.io';
 import { GlobalState, ConnectedUsers } from '../types/types';
+import { updateUserList } from './updateUserList';
 
 
 export const handleJoinRoom = (io: Server, socket: Socket, room: string, globalState: GlobalState, connectedUsers: ConnectedUsers) => {
@@ -24,15 +25,11 @@ export const handleJoinRoom = (io: Server, socket: Socket, room: string, globalS
 
 
 
-  let userNameList: string[] = [];
-  globalState[room].players.map((socketId) => {
-    userNameList.push(connectedUsers[socketId].name);
-  });
-  io.to(room).emit('userListChange', JSON.stringify(userNameList));
+  updateUserList(io, socket, globalState, connectedUsers);
 };
 
 
-// * This logic is not required as leave room is same as disconnect and combiined with socket.on('disconnect')
+// * This logic is not required
 
 // export const handleLeaveRoom = (io: Server, socket: Socket, room: string, globalState: GlobalState, connectedUsers: ConnectedUsers) => {
 //   socket.leave(room);

@@ -1,5 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { GlobalState, ConnectedUsers } from '../types/types';
+import { updateUserList } from './updateUserList';
+
 
 export const handleConnect = (io: Server, socket: Socket, connectedUsers: ConnectedUsers) => {
   const username = `Guest${Math.floor(Math.random() * 900) + 100}`;
@@ -28,16 +30,15 @@ export const handleDisconnect = (io: Server, socket: Socket, globalState: Global
 
   delete connectedUsers[socket.id];
 
-  let userNameList: string[] = [];
-  globalState[user.room]?.players?.map((socketId) => {
-    userNameList.push(connectedUsers[socketId].name);
-  });
+
+  updateUserList(io, socket, globalState, connectedUsers);
+
 
   if (globalState[user.room]?.owner === socket.id) {
     globalState[user.room].owner = globalState[user.room]?.players[0];
+
     io.to(user.room).emit('ownerChange', globalState[user.room].owner);
+
     io.to(user.room).emit('log', `Room Owner is ${connectedUsers[globalState[user.room].owner].name}`);
   }
-
-  io.to(user.room).emit('userListChange', JSON.stringify(userNameList));
 };
