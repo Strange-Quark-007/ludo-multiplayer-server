@@ -4,3 +4,6 @@ node_modules/
 # Dependency directories
 pnpm-lock.yaml
 yarn.lock
+
+#Temporary Mockup of global State
+globalState.json 
