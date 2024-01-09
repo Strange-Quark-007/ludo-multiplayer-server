@@ -37,12 +37,12 @@ export const handleDisconnect = (io: Server, socket: Socket, globalState: Global
 
   delete connectedUsers[socket.id];
 
-  if (globalState[user.room].players.length == 0) {
-    delete globalState[user.room];
+  if (globalState[user.room]?.players?.length == 0) {
+    delete globalState[user?.room];
   }
 
-  if (globalState[user.room].players.every((p) => p === "disconnected")) {
-    delete globalState[user.room];
+  if (globalState[user.room]?.players?.every((p) => p === "disconnected")) {
+    delete globalState[user?.room];
   }
 
 
