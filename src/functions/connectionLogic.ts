@@ -13,6 +13,7 @@ export const handleConnect = (io: Server, socket: Socket, connectedUsers: Connec
 };
 
 
+
 export const handleDisconnect = (io: Server, socket: Socket, globalState: GlobalState, connectedUsers: ConnectedUsers) => {
 
   const user = connectedUsers[socket.id];
@@ -22,23 +23,35 @@ export const handleDisconnect = (io: Server, socket: Socket, globalState: Global
 
   io.to(user.room).emit('log', `User ${user.name} left room.`);
 
-  globalState[user.room].players = globalState[user.room].players.filter((s) => s !== socket.id);
+
+  if (globalState[user.room].gameStatus !== "inPlay") {
+    globalState[user.room].players = globalState[user.room].players.filter((s) => s !== socket.id);
+  }
+  else {
+    let index = globalState[user.room].players.findIndex((p) => p === socket.id);
+    globalState[user.room].players[index] = "disconnected";
+  }
+
+
+  updateUserList(io, socket, globalState, connectedUsers);
+
+  delete connectedUsers[socket.id];
 
   if (globalState[user.room].players.length == 0) {
     delete globalState[user.room];
   }
 
-  delete connectedUsers[socket.id];
+  if (globalState[user.room].players.every((p) => p === "disconnected")) {
+    delete globalState[user.room];
+  }
 
 
-  updateUserList(io, socket, globalState, connectedUsers);
+  if (globalState[user?.room]?.owner === socket.id) {
+    let newOwner = globalState[user.room]?.players.find((p) => p != "disconnected");
+    globalState[user?.room].owner = newOwner!;
 
+    io.to(user?.room).emit('ownerChange', globalState[user?.room]?.owner);
 
-  if (globalState[user.room]?.owner === socket.id) {
-    globalState[user.room].owner = globalState[user.room]?.players[0];
-
-    io.to(user.room).emit('ownerChange', globalState[user.room].owner);
-
-    io.to(user.room).emit('log', `Room Owner is ${connectedUsers[globalState[user.room].owner].name}`);
+    io.to(user?.room).emit('log', `Room Owner is ${connectedUsers[globalState[user.room].owner]?.name}`);
   }
 };
