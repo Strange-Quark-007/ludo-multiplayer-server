@@ -11,9 +11,13 @@ export const updateUserList = (io: Server, socket: Socket, globalState: GlobalSt
   const user = connectedUsers[socket.id];
   let userList: UserItem[] = [];
 
-  globalState[user?.room]?.players?.map((socketId) => {
-    userList.push({ "socketId": socketId, "name": connectedUsers[socketId].name });
+  globalState[user.room].players.map((socketId) => {
+    userList.push({ "socketId": socketId, "name": connectedUsers[socketId]?.name });
   });
 
-  io.to(user?.room).emit('userListChange', JSON.stringify(userList));
+  if (globalState[user.room].gameStatus === "start") {
+    io.to(user.room).emit('userListChange', JSON.stringify(userList));
+  } else {
+    io.to(user.room).emit('inPlayUserDisconnect', JSON.stringify(userList));
+  }
 };

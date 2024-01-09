@@ -9,6 +9,7 @@ export interface ConnectedUsers {
 
 export interface Room {
   "owner": string;
+  "gameStatus": string;
   "playersReady": number;
   "currentTurn": string;
   "players": string[];
