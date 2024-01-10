@@ -26,20 +26,22 @@ export const handleDisconnect = (io: Server, socket: Socket, globalState: Global
 
   if (globalState[user.room].gameStatus !== "inPlay") {
     globalState[user.room].players = globalState[user.room].players.filter((s) => s !== socket.id);
+    globalState[user.room].playersReady.fill(0);
   }
   else {
     let index = globalState[user.room].players.findIndex((p) => p === socket.id);
     globalState[user.room].players[index] = "disconnected";
   }
 
-
   updateUserList(io, socket, globalState, connectedUsers);
 
   delete connectedUsers[socket.id];
 
+
   if (globalState[user.room]?.players?.length == 0) {
     delete globalState[user?.room];
   }
+
 
   if (globalState[user.room]?.players?.every((p) => p === "disconnected")) {
     delete globalState[user?.room];

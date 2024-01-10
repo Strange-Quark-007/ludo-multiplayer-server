@@ -7,7 +7,7 @@ export const handleJoinRoom = (io: Server, socket: Socket, room: string, globalS
 
   const user = connectedUsers[socket.id];
   if (!globalState[room])
-    globalState[room] = { "owner": socket.id, "playersReady": 0, "gameStatus": "start", "currentTurn": '', "players": [] };
+    globalState[room] = { "owner": socket.id, "playersReady": [0, 0, 0, 0], "gameStatus": "start", "currentTurn": '', "players": [] };
 
 
 

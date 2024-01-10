@@ -4,11 +4,13 @@ import { GlobalState, ConnectedUsers } from '../types/types';
 
 export const gameLogic = (io: Server, socket: Socket, globalState: GlobalState, connectedUsers: ConnectedUsers) => {
 
+  // * isReady is boolean sent as Number(bool) representing either 0 or 1
 
-  socket.on('ready', () => {
+  socket.on('ready', (isReady: number) => {
     const user = connectedUsers[socket.id];
-    globalState[user?.room].playersReady = globalState[user?.room].playersReady + 1;
-    let pr = globalState[user?.room].playersReady;
+    let index = globalState[user?.room].players.findIndex((p) => p === socket.id);
+    globalState[user?.room].playersReady[index] = isReady;
+    let pr = globalState[user?.room]?.playersReady.reduce((sum, p) => sum + p, 0);
     io.to(user.room).emit('ready', pr);
     io.to(user.room).emit('log', `${pr} players ready.`);
   });
